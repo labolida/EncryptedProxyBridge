@@ -19,10 +19,10 @@ How to run a simple test:
 Explain:
 	
 	The TestRequest connects to the first node at local machine at port 963
-	and sends a HTTP tradicional request.
+	and sends a HTTP common request.
 	The first node receives it and connect to the second node at a remote machine at port 964
-	and resends the requestd data.
+	and resends the requested data.
 	The second node receives it and connect to the next node at port 8000 (port that is running a RealWebServer)
-	resends the requestd data and receives a HttpResponse that is sent back to the socket requester and so on...
+	resends the requested data and receives a HttpResponse that is sent back to the socket requester and so on...
 	
 

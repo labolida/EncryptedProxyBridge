@@ -1,8 +1,11 @@
 package com.labolida.bridge;
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import com.labolida.security.Cryptography;
 import com.labolida.startup.Context;
 
 public class ServerAttend extends Thread{
@@ -25,23 +28,51 @@ public class ServerAttend extends Thread{
 			OutputStream out2 = socket2.getOutputStream();
 			InputStream in2 = socket2.getInputStream();
 			
-			//while(true) {
-				byte buff[] = new byte[1024*8];
-				int length = in.read(buff);
-				byte buff2[] = getNewByteArray(buff,length);
-				System.out.println("[ServerAttend]: data received: " + new String(buff2) );
-				System.out.println("[ServerAttend] connecting to " + Context.bridgeToIP + ":" + Context.bridgeToPORT );
-				System.out.println("[ServerAttend] sending data " + new String(buff2) );
-				out2.write(buff2);
-				out2.flush();
-				sleep(20);
-				length = in2.read(buff);
-				buff2 = getNewByteArray(buff,length);
-				System.out.println("[ServerAttend] received data " + new String(buff2) );
-				System.out.println("[ServerAttend] and sending back to the sourcesocket."  );
-				out.write(buff2); // sending response to the RequestSocket
-				out.flush();
-			//}
+			
+			// RECEIVE REQUEST DATA FROM PREVIOUS NODE
+			byte data[] = new byte[1024*8];
+			int length = in.read(data);
+			data = getNewByteArray(data,length);
+			System.out.println("[ServerAttend]: data received: " + new String(data) );
+			
+			if (Context.sideplay==1){
+				data = Cryptography.encode(data, Context.KEY);
+				System.out.println("Message encrypted!");
+			}
+			if (Context.sideplay==2){
+				data = Cryptography.decode(data, Context.KEY);
+				System.out.println("Message decrypted!");
+			}
+			
+			// SEND REQUEST DATA TO THE NEXT NODE
+			System.out.println("[ServerAttend] connecting to " + Context.bridgeToIP + ":" + Context.bridgeToPORT );
+			System.out.println("[ServerAttend] sending data " + new String(data) );
+			out2.write(data);
+			out2.flush();
+			//out2.close();
+			sleep(20);
+			
+			// RECEIVE RESPONSE DATA FROM NEXT NODE
+			data = new byte[1024*8];
+			length = in2.read(data);
+			data = getNewByteArray(data,length);
+			System.out.println("[ServerAttend] received data " + new String(data) );
+			
+			if (Context.sideplay==2){
+				data = Cryptography.encode(data, Context.KEY);
+				System.out.println("Message encrypted!");
+			}
+			if (Context.sideplay==1){
+				data = Cryptography.decode(data, Context.KEY);
+				System.out.println("Message decrypted!");
+			}
+			
+			// SEND RESPONSE TO THE PREVIOUS NODE
+			System.out.println("[ServerAttend] and sending back to the sourcesocket."  );
+			out.write(data); // sending response to the RequestSocket
+			out.flush();
+			Thread.sleep(200);
+			out.close();
 		}
 		catch (Exception e) {
 			System.out.println("error at " + this.getClass().getName()+ " message:" + e.getMessage());
@@ -59,4 +90,31 @@ public class ServerAttend extends Thread{
 		}
 		return buff;
 	}
+	
+	
+	
+	
+	private byte[] socketRead(Socket socket){
+		try {
+			InputStream in = socket.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			StringBuffer buff = new StringBuffer();
+			String r;
+			while ((r = reader.readLine()) != null){
+				buff.append(r);
+			}
+			return new String(buff).getBytes();
+		}
+		catch (Exception e) {
+			System.out.println("error at " + this.getClass().getName() + " message:"+ e.getMessage());
+			return null;
+		}
+	}
+	
+	
 }
+
+
+
+
+

@@ -10,6 +10,9 @@ public class TestRequest {
 
 	public static void main(String[] args) {
 		try {
+			
+			System.out.println("TestRequest init...");
+			
 			Socket socket = new Socket("127.0.0.1",963);
 			OutputStream out = socket.getOutputStream();
 			InputStream in = socket.getInputStream();
@@ -20,11 +23,10 @@ public class TestRequest {
 			out.write("\n\n".getBytes());
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-			String something;
-
-			  while ((something = reader.readLine()) != null){
-			    	 System.out.println("" + something );
-			  }
+			String buff;
+			while ((buff = reader.readLine()) != null){
+				System.out.println("" + buff );
+			}
 		}
 		catch (Exception e) {
 			System.out.println("error at " + TestRequest.class.getName()+ " message:" + e.getMessage());
