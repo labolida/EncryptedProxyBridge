@@ -1,0 +1,28 @@
+Encrypted Proxy Bridge
+By leonardo.labolida.com
+
+The goal is to encrypt the communication between 2 sockets.
+
+
+How to run a simple test:
+
+	Startup the first node:
+	java Startup 963 127.0.0.1 964
+
+	Startup the second node:
+	java Startup 964 127.0.0.1 8000
+	
+	Startup the client tester:
+	java TestRequest
+	
+	
+Explain:
+	
+	The TestRequest connects to the first node at local machine at port 963
+	and sends a HTTP tradicional request.
+	The first node receives it and connect to the second node at a remote machine at port 964
+	and resends the requestd data.
+	The second node receives it and connect to the next node at port 8000 (port that is running a RealWebServer)
+	resends the requestd data and receives a HttpResponse that is sent back to the socket requester and so on...
+	
+
